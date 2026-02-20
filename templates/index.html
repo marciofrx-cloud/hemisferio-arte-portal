@@ -1,0 +1,475 @@
+Skip to content
+marciofrx-cloud
+hemisferio-arte-portal
+Repository navigation
+Code
+Issues
+Pull requests
+Actions
+Projects
+Wiki
+Security
+Insights
+Settings
+Comparing changes
+Choose two branches to see what’s changed or to start a new pull request. If you need to, you can also  or learn more about diff comparisons.
+...
+ 1 commit
+ 3 files changed
+ 1 contributor
+Commits on Feb 19, 2026
+Delete templates directory
+
+@marciofrx-cloud
+marciofrx-cloud authored 1 hour ago
+ Showing  with 0 additions and 475 deletions.
+ 51 changes: 0 additions & 51 deletions51  
+templates/base.html
+This file was deleted.
+
+ 64 changes: 0 additions & 64 deletions64  
+templates/cart.html
+Copied! 
+Original file line number	Diff line number	Diff line change
+@@ -1,64 +0,0 @@
+{% extends "base.html" %}
+
+{% block title %}Carrinho - Hemisfério Arte Digital{% endblock %}
+
+{% block content %}
+<h1 class="mb-4">Seu Carrinho</h1>
+
+{% if cart_items %}
+<div class="table-responsive">
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th>Produto</th>
+                <th>Preço</th>
+                <th>Quantidade</th>
+                <th>Total</th>
+                <th>Ações</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for item in cart_items %}
+            <tr>
+                <td>
+                    <div class="d-flex align-items-center">
+                        <img src="{{ url_for('static', filename=item.image_path) }}" alt="{{ item.name }}" class="img-thumbnail me-3" style="width: 80px;">
+                        <span>{{ item.name }}</span>
+                    </div>
+                </td>
+                <td>R$ {{ "%.2f"|format(item.price) }}</td>
+                <td>
+                    <form method="POST" action="{{ url_for('update_cart', product_id=item.id) }}" class="d-inline">
+                        <input type="number" name="quantity" value="{{ item.quantity }}" min="1" class="form-control" style="width: 80px;">
+                        <button type="submit" class="btn btn-sm btn-primary mt-1">Atualizar</button>
+                    </form>
+                </td>
+                <td>R$ {{ "%.2f"|format(item.item_total) }}</td>
+                <td>
+                    <a href="{{ url_for('remove_from_cart', product_id=item.id) }}" class="btn btn-sm btn-danger">Remover</a>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+        <tfoot>
+            <tr>
+                <td colspan="3" class="text-end fw-bold">Total:</td>
+                <td colspan="2" class="fw-bold text-success fs-5">R$ {{ "%.2f"|format(total_price) }}</td>
+            </tr>
+        </tfoot>
+    </table>
+</div>
+
+<div class="d-flex justify-content-between mt-4">
+    <a href="{{ url_for('index') }}" class="btn btn-secondary">Continuar Comprando</a>
+    <button class="btn btn-success btn-lg">Finalizar Compra</button>
+</div>
+
+{% else %}
+<div class="alert alert-info text-center">
+    <h4>Seu carrinho está vazio!</h4>
+    <p>Adicione produtos para começar suas compras.</p>
+    <a href="{{ url_for('index') }}" class="btn btn-primary">Ver Produtos</a>
+</div>
+{% endif %}
+{% endblock %}
+ 360 changes: 0 additions & 360 deletions360  
+templates/index.html
+Original file line number	Diff line number	Diff line change
+@@ -1,360 +0,0 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hemisfério Arte - Portal de Cultura e Conhecimento</title>
+
+    <!-- Google Fonts: Playfair Display e Open Sans -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=Open+Sans:wght@400;600;700&display=swap" rel="stylesheet">
+
+    <style>
+        /* ========== RESET E CONFIGURAÇÕES GLOBAIS ========== */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            /* Paleta de Cores */
+            --cor-fundo-claro: #F5F5F0;
+            --cor-branco: #FFFFFF;
+            --cor-cinza-escuro: #2C3E50;
+            --cor-cinza-medio: #7F8C8D;
+            --cor-dourado: #D4AF37;
+            --cor-azul-profundo: #1A237E;
+            --cor-roxo-suave: #6A1B9A;
+            --cor-verde-esmeralda: #2E7D32;
+
+            /* Tipografia */
+            --fonte-titulos: 'Playfair Display', serif;
+            --fonte-textos: 'Open Sans', sans-serif;
+
+            /* Sombras */
+            --sombra-sutil: 0 2px 8px rgba(0, 0, 0, 0.1);
+            --sombra-hover: 0 4px 16px rgba(0, 0, 0, 0.15);
+
+            /* Bordas */
+            --raio-borda: 8px;
+        }
+
+        body {
+            font-family: var(--fonte-textos);
+            color: var(--cor-cinza-escuro);
+            background-color: var(--cor-fundo-claro);
+            overflow-x: hidden;
+        }
+
+        /* ========== VÍDEO DE FUNDO ========== */
+        .video-background {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100vh;
+            overflow: hidden;
+            z-index: -2;
+        }
+
+        .video-background video {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        /* Overlay translúcido sobre o vídeo */
+        .video-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100vh;
+            background: linear-gradient(135deg, 
+                rgba(26, 35, 126, 0.4) 0%, 
+                rgba(106, 27, 154, 0.3) 100%);
+            z-index: -1;
+        }
+
+        /* ========== CABEÇALHO (HEADER) ========== */
+        header {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            padding: 20px 40px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            z-index: 1000;
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .logo {
+            height: 60px;
+            filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.3));
+        }
+
+        nav ul {
+            list-style: none;
+            display: flex;
+            gap: 30px;
+        }
+
+        nav a {
+            font-family: var(--fonte-textos);
+            font-weight: 600;
+            font-size: 16px;
+            color: var(--cor-branco);
+            text-decoration: none;
+            transition: color 0.3s ease, transform 0.3s ease;
+            text-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+        }
+
+        nav a:hover {
+            color: var(--cor-dourado);
+            transform: translateY(-2px);
+        }
+
+        /* ========== SEÇÃO HERO (CHAMADA PARA AÇÃO) ========== */
+        .hero {
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            padding: 0 20px;
+        }
+
+        .hero h1 {
+            font-family: var(--fonte-titulos);
+            font-size: 64px;
+            font-weight: 700;
+            color: var(--cor-branco);
+            margin-bottom: 20px;
+            text-shadow: 0 3px 10px rgba(0, 0, 0, 0.5);
+            animation: fadeInDown 1s ease-out;
+        }
+
+        .hero p {
+            font-family: var(--fonte-textos);
+            font-size: 22px;
+            color: var(--cor-branco);
+            margin-bottom: 40px;
+            max-width: 700px;
+            line-height: 1.6;
+            text-shadow: 0 2px 6px rgba(0, 0, 0, 0.4);
+            animation: fadeInUp 1s ease-out 0.3s both;
+        }
+
+        /* ========== BOTÃO PRIMÁRIO ========== */
+        .btn-primary {
+            font-family: var(--fonte-textos);
+            font-weight: 700;
+            font-size: 18px;
+            padding: 16px 48px;
+            background-color: var(--cor-dourado);
+            color: var(--cor-cinza-escuro);
+            border: none;
+            border-radius: var(--raio-borda);
+            cursor: pointer;
+            text-decoration: none;
+            display: inline-block;
+            box-shadow: var(--sombra-sutil);
+            transition: all 0.3s ease;
+            animation: fadeInUp 1s ease-out 0.6s both;
+        }
+
+        .btn-primary:hover {
+            background: linear-gradient(135deg, var(--cor-dourado) 0%, #F4D03F 100%);
+            box-shadow: var(--sombra-hover);
+            transform: translateY(-3px);
+        }
+
+        /* ========== SEÇÃO DE CONTEÚDO (ABAIXO DA DOBRA) ========== */
+        .content-section {
+            background-color: var(--cor-fundo-claro);
+            padding: 80px 40px;
+            min-height: 100vh;
+        }
+
+        .content-section h2 {
+            font-family: var(--fonte-titulos);
+            font-size: 48px;
+            color: var(--cor-cinza-escuro);
+            text-align: center;
+            margin-bottom: 60px;
+        }
+
+        .spaces-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 40px;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .space-card {
+            background: var(--cor-branco);
+            padding: 40px 30px;
+            border-radius: var(--raio-borda);
+            box-shadow: var(--sombra-sutil);
+            text-align: center;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .space-card:hover {
+            box-shadow: var(--sombra-hover);
+            transform: translateY(-5px);
+        }
+
+        .space-card h3 {
+            font-family: var(--fonte-titulos);
+            font-size: 28px;
+            color: var(--cor-azul-profundo);
+            margin-bottom: 15px;
+        }
+
+        .space-card p {
+            font-family: var(--fonte-textos);
+            font-size: 16px;
+            color: var(--cor-cinza-medio);
+            line-height: 1.6;
+        }
+
+        /* ========== ANIMAÇÕES ========== */
+        @keyframes fadeInDown {
+            from {
+                opacity: 0;
+                transform: translateY(-30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* ========== RESPONSIVIDADE ========== */
+        @media (max-width: 768px) {
+            header {
+                padding: 15px 20px;
+            }
+
+            .logo {
+                height: 45px;
+            }
+
+            nav ul {
+                gap: 15px;
+            }
+
+            nav a {
+                font-size: 14px;
+            }
+
+            .hero h1 {
+                font-size: 42px;
+            }
+
+            .hero p {
+                font-size: 18px;
+            }
+
+            .btn-primary {
+                font-size: 16px;
+                padding: 14px 36px;
+            }
+
+            .content-section h2 {
+                font-size: 36px;
+            }
+
+            .spaces-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- VÍDEO DE FUNDO -->
+    <div class="video-background">
+        <video autoplay muted loop playsinline>
+            <source src="video-apresentacao.mp4" type="video/mp4">
+            Seu navegador não suporta vídeos HTML5.
+        </video>
+    </div>
+    <div class="video-overlay"></div>
+
+    <!-- CABEÇALHO -->
+    <header>
+        <img src="Logo.png">
+        <nav>
+            <ul>
+                <li><a href="#books">Books</a></li>
+                <li><a href="#music">Music</a></li>
+                <li><a href="#art">Art</a></li>
+                <li><a href="#friends">Friends</a></li>
+                <li><a href="#soul">Soul</a></li>
+                <li><a href="#games">Games</a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <!-- SEÇÃO HERO -->
+    <section class="hero">
+        <h1>Bem-vindo ao Hemisfério Arte</h1>
+        <p>Explore um universo de cultura, conhecimento e criatividade. Descubra livros, música, arte e muito mais em um portal criado para inspirar.</p>
+        <a href="#explore" class="btn-primary">Explorar o Portal</a>
+    </section>
+
+    <!-- SEÇÃO DE CONTEÚDO -->
+    <section class="content-section" id="explore">
+        <h2>Descubra Nossos Espaços</h2>
+        <div class="spaces-grid">
+            <div class="space-card">
+                <h3>Books</h3>
+                <p>Mergulhe em nosso acervo literário com obras cuidadosamente selecionadas.</p>
+            </div>
+            <div class="space-card">
+                <h3>Music</h3>
+                <p>Descubra sons que tocam a alma e expandem horizontes.</p>
+            </div>
+            <div class="space-card">
+                <h3>Art</h3>
+                <p>Aprecie obras de arte que inspiram e transformam.</p>
+            </div>
+            <div class="space-card">
+                <h3>Friends</h3>
+                <p>Conecte-se com uma comunidade apaixonada por cultura.</p>
+            </div>
+            <div class="space-card">
+                <h3>Soul</h3>
+                <p>Explore reflexões sobre espiritualidade e crescimento pessoal.</p>
+            </div>
+            <div class="space-card">
+                <h3>Games</h3>
+                <p>Divirta-se com jogos que desafiam e entretêm.</p>
+            </div>
+        </div>
+    </section>
+</body>
+</html>
+
+
+Footer
+© 2026 GitHub, Inc.
+Footer navigation
+Terms
+Privacy
+Security
+Status
+Community
+Docs
+Contact
+Manage cookies
+Do not share my personal information
+
