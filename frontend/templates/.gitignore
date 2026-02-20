@@ -1,0 +1,16 @@
+# Ignorar arquivos temporários e de configuração do VS Code e Python
+    .vscode/
+    *.lnk
+    *.json
+    *.sqlite
+    *.db
+    *.pyc
+    __pycache__/
+    .vswuo
+    .vs/
+    uploads/
+    *.mp3
+    *.jpg
+    *.png
+    *.gif
+*   **Explicação:** Adicionei `*.mp3`, `*.jpg`, `*.png`, `*.gif` para que o Git ignore esses arquivos de mídia grandes. Se
